@@ -14,7 +14,9 @@ import java.util.logging.Logger;
  * Handles the saving and loading of states.
  */
 public class Storage {
-    public static final String FILE_PATH = "data/duke.txt";
+    public static final String FILE_PATH = "data/duke-sem-";
+
+    public static final String EXTENSION = ".txt";
 
     public static final String NO_PREVIOUS_STATE_ERROR_MESSAGE = "There was no previously saved state.";
 
@@ -40,8 +42,11 @@ public class Storage {
         logger = Logger.getLogger(SUBSYSTEM_NAME);
         logger.log(Level.FINE, "Attempting to open previous saved file");
         try {
-            String link = readPreviousState();
-            Link.parseLink(link, state);
+            for (int i = 1; i < 5; i++) {
+                String link = readPreviousState(i);
+                Link.parseLink(link, state);
+            }
+            state.setSemester(1);
             ui.addMessage(LOADING_PREVIOUS_STATE_MESSAGE);
             logger.log(Level.FINE, "Opened previous saved file");
         } catch (FileNotFoundException e) {
@@ -58,12 +63,13 @@ public class Storage {
      * Opens the previously saved file. The saved file should only contain one line which is the
      * link for exporting to NUSMods.
      *
+     * @param semester the semester file to look into
      * @return the link for exporting to NUSMods
      * @throws FileNotFoundException the file in the file path cannot be found
      */
-    private String readPreviousState() throws FileNotFoundException {
+    private String readPreviousState(int semester) throws FileNotFoundException {
         String link = "";
-        File file = new File(FILE_PATH);
+        File file = new File(FILE_PATH + semester + EXTENSION);
         Scanner scanner = new Scanner(file);
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
@@ -88,18 +94,20 @@ public class Storage {
         logger = Logger.getLogger(SUBSYSTEM_NAME);
         logger.log(Level.FINE, "Saving current state with " + state.getSelectedModulesList().size()
                 + " modules into a file. The format will be NUSMods export link.");
-        File file = new File(FILE_PATH);
-        if (file.getParentFile().mkdirs()) {
-            file.createNewFile();
-        }
-
-        String toSave = Link.getLink(state);
         ui.addMessage(EXPORT_MESSAGE);
-        ui.addMessage(toSave);
+        for (int i = 1; i < 5; i++) {
+            File file = new File(FILE_PATH + i + EXTENSION);
+            file.getParentFile().mkdirs();
+            file.createNewFile();
 
+            state.setSemester(i);
+            String toSave = Link.getLink(state);
+            ui.addMessage(toSave);
+
+            FileWriter fw = new FileWriter(file);
+            fw.write(String.valueOf(toSave));
+            fw.close();
+        }
         ui.displayUi();
-        FileWriter fw = new FileWriter(file);
-        fw.write(String.valueOf(toSave));
-        fw.close();
     }
 }
