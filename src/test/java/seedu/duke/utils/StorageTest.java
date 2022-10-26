@@ -1,6 +1,5 @@
 package seedu.duke.utils;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import seedu.duke.model.LessonType;
 import seedu.duke.model.Module;
@@ -8,8 +7,6 @@ import seedu.duke.model.SelectedModule;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
