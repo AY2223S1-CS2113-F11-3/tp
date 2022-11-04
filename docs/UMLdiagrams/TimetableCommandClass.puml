@@ -7,7 +7,12 @@ class TimetableCommand {
     <u>+ COMMAND_WORD: String
     <u>+ COMMAND_USAGE: String
     <u>+ COMMAND_DESCRIPTION: String
-    <u>- ERROR_MESSAGE_EMPTY_TIMETABLE: String
+    <u>- CONFLICTING_ERROR_MESSAGE: String
+    <u>- EMPTY_TIMETABLE_ERROR_MESSAGE: String
+    <u>- EXTRA_PARAMETERS_ERROR_MESSAGE: String
+    <u>- FANCY_KEY: String
+    <u>- MISSING_BACKSLASH_ERROR_MESSAGE: String
+    <u>- SIMPLE_KEY: String
     - showFancy: boolean
     - showSimple: boolean
 

@@ -17,31 +17,46 @@ import java.util.List;
 import java.util.Map;
 
 public class TimetableCommand extends Command {
+    private static final String FANCY_KEY = "fancy";
+
+    private static final String SIMPLE_KEY = "simple";
+
     public static final String COMMAND_WORD = "timetable";
-    public static final String COMMAND_USAGE = "timetable < /fancy | /simple >";
+
+    public static final String COMMAND_USAGE = COMMAND_WORD + " < /" + FANCY_KEY + " | /" + SIMPLE_KEY + " >";
+
     public static final String COMMAND_DESCRIPTION = "Display current timetable.";
 
-    private static final String ERROR_MESSAGE_EMPTY_TIMETABLE = "Your timetable is empty."
+    private static final String EMPTY_TIMETABLE_ERROR_MESSAGE = "Your timetable is empty."
             + System.lineSeparator() + "Please select your modules first before viewing.";
 
+    private static final String CONFLICTING_ERROR_MESSAGE = "Timetable cannot be both " + SIMPLE_KEY
+            + " and " + FANCY_KEY + "!";
+
+    private static final String EXTRA_PARAMETERS_ERROR_MESSAGE = "Unknown command. Maybe you meant \""
+            + COMMAND_USAGE + "\".";
+
+    private static final String MISSING_BACKSLASH_ERROR_MESSAGE = "Unknown command. Maybe you forgot a \"/\".";
+
     private boolean showFancy;
+
     private boolean showSimple;
 
     public TimetableCommand(String input) throws YamomException {
         super(input.split("\\s+"));
         var params = Parser.parseParams(input);
-        showFancy = params.containsKey("fancy");
-        showSimple = params.containsKey("simple");
+        showFancy = params.containsKey(FANCY_KEY);
+        showSimple = params.containsKey(SIMPLE_KEY);
         boolean isConflictingCommand = showFancy && showSimple;
-        boolean hasMissingBackslash = !input.contains("/") && (input.contains("fancy") || input.contains("simple"));
-        boolean unknownParametersEntered = input.split("\\s+").length > 2 || ((!showFancy && !showSimple)
-                && !Parser.isOneWordCommand(input.split("\\s+")));
+        boolean hasMissingBackslash = !input.contains("/") && (input.contains(FANCY_KEY) || input.contains(FANCY_KEY));
+        boolean unknownParametersEntered = Parser.isMultiWordsCommand(input.split("\\s+"))
+                || ((!showFancy && !showSimple) && Parser.isTwoWordsCommand(input.split("\\s+")));
         if (isConflictingCommand) {
-            throw new YamomException("Timetable cannot be both simple and fancy!");
+            throw new YamomException(CONFLICTING_ERROR_MESSAGE);
         } else if (hasMissingBackslash) {
-            throw new YamomException("Unknown command. Maybe you forgot a \"/\".");
+            throw new YamomException(MISSING_BACKSLASH_ERROR_MESSAGE);
         } else if (unknownParametersEntered) {
-            throw new YamomException("Unknown command. Maybe you meant \"view\".");
+            throw new YamomException(EXTRA_PARAMETERS_ERROR_MESSAGE);
         }
     }
 
@@ -54,7 +69,7 @@ public class TimetableCommand extends Command {
             addToLessonsList(state, lessons, selectedModule, selectedSlots);
         }
         if (lessons.isEmpty()) {
-            ui.addMessage(ERROR_MESSAGE_EMPTY_TIMETABLE);
+            ui.addMessage(EMPTY_TIMETABLE_ERROR_MESSAGE);
             ui.displayUi();
             return;
 

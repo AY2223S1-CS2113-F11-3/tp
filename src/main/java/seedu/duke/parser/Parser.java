@@ -100,6 +100,10 @@ public class Parser {
         return (matcher.find() && matcher.group().length() == moduleCode.length());
     }
 
+    public static boolean isMultiWordsCommand(String[] keywords) {
+        return keywords.length > 2;
+    }
+
     public static boolean isTwoWordsCommand(String[] keywords) {
         return keywords.length == 2;
     }

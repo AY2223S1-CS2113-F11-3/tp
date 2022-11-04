@@ -2,21 +2,18 @@ package seedu.duke.utils;
 
 import seedu.duke.exceptions.YamomException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  * Handles the saving and loading of states.
  */
 public class Storage {
-    public static final String FILE_PATH = "data/duke.txt";
-
     public static final String NO_PREVIOUS_STATE_ERROR_MESSAGE = "There was no previously saved state.";
 
     public static final String LOADING_PREVIOUS_STATE_MESSAGE = "Loading previous state.";
@@ -25,9 +22,22 @@ public class Storage {
 
     public static final String EXPORT_MESSAGE = "These are your export links:";
 
+    public static final String PREFERENCES_FLUSH_ERROR_MESSAGE = "Saving cannot be completed due to a failure in "
+            + "the backing store, or inability to communicate with it.";
+
     private Logger logger = Logger.getLogger(Storage.class.getName());
 
     public static final String SUBSYSTEM_NAME = "storage";
+
+    private Preferences prefs;
+
+    public Storage() {
+        this.prefs = Preferences.userRoot().node(this.getClass().getName());
+    }
+
+    public Preferences getPrefs() {
+        return prefs;
+    }
 
     /**
      * Tries to open the file containing the previously saved state from specified file path.
@@ -70,15 +80,13 @@ public class Storage {
      */
     private ArrayList<String> readPreviousState() throws FileNotFoundException {
         ArrayList<String> links = new ArrayList<>();
-        File file = new File(FILE_PATH);
-        Scanner scanner = new Scanner(file);
-        while (scanner.hasNext()) {
-            String line = scanner.nextLine();
-            if (Link.isValidLink(line)) {
-                links.add(line);
+        for (int i = 1; i <= 4; i++) {
+            String semester = "sem-" + i;
+            String link = prefs.get(semester, "");
+            if (Link.isValidLink(link)) {
+                links.add(link);
             }
         }
-        scanner.close();
         return links;
     }
 
@@ -94,24 +102,24 @@ public class Storage {
         logger = Logger.getLogger(SUBSYSTEM_NAME);
         logger.log(Level.FINE, "Saving current state with " + state.getSelectedModulesList().size()
             + " modules into a file. The format will be NUSMods export link.");
-        File file = new File(FILE_PATH);
-        if (file.getParentFile().mkdirs()) {
-            file.createNewFile();
-        }
         ui.addMessage(EXPORT_MESSAGE);
-        FileWriter fw = new FileWriter(file);
         int currSem = state.getSemester();
         for (int i = 1; i <= 4; i++) {
             state.setSemester(i);
+            String semester = "sem-" + i;
             String toSave = Link.getLink(state);
             ui.addMessage(toSave);
-            fw.write(toSave + System.lineSeparator());
+            prefs.put(semester, toSave);
         }
         state.setSemester(currSem);
         if (!isExit) {
             ui.clearUiBuffer();
         }
+        try {
+            prefs.flush();
+        } catch (BackingStoreException e) {
+            ui.addMessage(PREFERENCES_FLUSH_ERROR_MESSAGE);
+        }
         ui.displayUi();
-        fw.close();
     }
 }

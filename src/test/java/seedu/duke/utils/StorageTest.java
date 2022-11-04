@@ -8,6 +8,7 @@ import seedu.duke.model.SelectedModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.prefs.Preferences;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,13 +32,13 @@ public class StorageTest {
         storage.saveState(state, ui, true);
 
         //Read saved state from saved file
-        File actualFile = new File("data/duke.txt");
-        Scanner actualScanner = new Scanner(actualFile);
         StringBuilder actualString = new StringBuilder();
-        while (actualScanner.hasNext()) {
-            actualString.append(actualScanner.nextLine());
+        Preferences prefs = storage.getPrefs();
+        for (int i = 1; i <= 4; i++) {
+            String semesterKey = "sem-" + i;
+            String link = prefs.get(semesterKey, "");
+            actualString.append(link);
         }
-        actualScanner.close();
 
         //Read state from expected file
         File expectedFile = new File("src/test/resources/saveCs1010.txt");
