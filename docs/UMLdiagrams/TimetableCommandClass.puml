@@ -16,7 +16,7 @@ class TimetableCommand {
     - showFancy: boolean
     - showSimple: boolean
 
-    - addToLessonsList(State, List<Pair<Module, RawLesson>>, SelectedModule, Map<LessonType, String>): void
-    - addValidLesson(List<Pair<Module, RawLesson, Module, List<RawLesson>): void
+    - addToLessonsList(int, List<Pair<Module, RawLesson>>, SelectedModule)
+    - addValidLesson(List<Pair<Module, RawLesson, Module, List<RawLesson>)
 }
 @enduml

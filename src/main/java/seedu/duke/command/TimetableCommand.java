@@ -64,9 +64,9 @@ public class TimetableCommand extends Command {
     public void execute(State state, Ui ui, Storage storage) {
         List<SelectedModule> selectedModules = state.getSelectedModulesList();
         List<Pair<Module, RawLesson>> lessons = new ArrayList<>();
+        int semester = state.getSemester();
         for (SelectedModule selectedModule: selectedModules) {
-            Map<LessonType, String> selectedSlots = selectedModule.getSelectedSlots();
-            addToLessonsList(state, lessons, selectedModule, selectedSlots);
+            addToLessonsList(semester, lessons, selectedModule);
         }
         if (lessons.isEmpty()) {
             ui.addMessage(EMPTY_TIMETABLE_ERROR_MESSAGE);
@@ -87,19 +87,35 @@ public class TimetableCommand extends Command {
         ui.displayUi();
     }
 
-    private void addToLessonsList(State state, List<Pair<Module, RawLesson>> lessons,
-                                         SelectedModule selectedModule, Map<LessonType, String> selectedSlots) {
+    /**
+     * Goes through the selected lessons for <code>SelectedModule</code> and gets the potential
+     * lessons.
+     *
+     * @param semester       The current semester.
+     * @param lessons        To store all the valid lessons of all modules selected.
+     * @param selectedModule The current module that lessons are selected for.
+     */
+    private void addToLessonsList(int semester, List<Pair<Module, RawLesson>> lessons,
+                                  SelectedModule selectedModule) {
+        Map<LessonType, String> selectedSlots = selectedModule.getSelectedSlots();
         for (Map.Entry<LessonType, String> slot: selectedSlots.entrySet()) {
             Module module = selectedModule.getModule();
-            int semester = state.getSemester();
             List<RawLesson> potentialLesson = module.getSemesterData(semester)
                     .getLessonsByTypeAndNo(slot.getKey(), slot.getValue());
             addValidLesson(lessons, module, potentialLesson);
         }
     }
 
+    /**
+     * Adds all the <code>RawLesson</code> that previously matches the <code>LessonType</code> and <code>ClassNo</code>.
+     *
+     * @param lessons         To store all the valid lessons of all modules selected.
+     * @param module          The current module that lessons are selected for.
+     * @param potentialLesson <code>RawLesson</code> that previously matches the <code>LessonType</code>
+     *                        and <code>ClassNo</code>.
+     */
     private void addValidLesson(List<Pair<Module, RawLesson>> lessons, Module module,
-                                       List<RawLesson> potentialLesson) {
+                                List<RawLesson> potentialLesson) {
         for (RawLesson lesson : potentialLesson) {
             lessons.add(Pair.of(module, lesson));
         }
